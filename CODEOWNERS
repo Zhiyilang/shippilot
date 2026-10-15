@@ -1,0 +1,6 @@
+# Every path has a named owner. ShipPilot audits this file.
+*                       @maintainers
+/.gitlab-ci.yml         @platform
+/.gitlab/duo/           @platform
+/shippilot/             @maintainers
+/examples/              @maintainers
