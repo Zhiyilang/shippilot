@@ -1,0 +1,4 @@
+# ShipPilot core: zero dependencies, Python 3.9+ standard library only.
+#
+# The web console is optional and is the only thing that needs an install:
+#     pip install gradio>=6
