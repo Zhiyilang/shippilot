@@ -1,0 +1,398 @@
+{
+  "tool": "shippilot",
+  "version": "1.0.0",
+  "repo": "shippilot",
+  "root": "D:\\\u684c\u9762\\part-time jobs\\GitHub\\shippilot",
+  "generated_at": "2026-10-15T02:50:31Z",
+  "autonomy": "hands-off",
+  "autonomy_description": "Human states intent and walks away; blockers still stop the ship.",
+  "stages": {
+    "plan": {
+      "ran": true,
+      "seconds": 0.0024,
+      "findings_before": 0,
+      "findings_after": 0
+    },
+    "create": {
+      "ran": true,
+      "seconds": 0.022,
+      "findings_before": 0,
+      "findings_after": 0
+    },
+    "verify": {
+      "ran": true,
+      "seconds": 0.0081,
+      "findings_before": 2,
+      "findings_after": 0
+    },
+    "package": {
+      "ran": true,
+      "seconds": 0.0016,
+      "findings_before": 0,
+      "findings_after": 0
+    },
+    "secure": {
+      "ran": true,
+      "seconds": 0.0676,
+      "findings_before": 3,
+      "findings_after": 1
+    },
+    "release": {
+      "ran": true,
+      "seconds": 0.0015,
+      "findings_before": 0,
+      "findings_after": 0
+    },
+    "configure": {
+      "ran": true,
+      "seconds": 0.0173,
+      "findings_before": 1,
+      "findings_after": 1
+    },
+    "monitor": {
+      "ran": true,
+      "seconds": 0.0289,
+      "findings_before": 0,
+      "findings_after": 0
+    },
+    "govern": {
+      "ran": true,
+      "seconds": 0.0017,
+      "findings_before": 0,
+      "findings_after": 0
+    }
+  },
+  "coverage": {
+    "touched": [
+      "plan",
+      "create",
+      "verify",
+      "package",
+      "secure",
+      "release",
+      "configure",
+      "monitor",
+      "govern"
+    ],
+    "count": 9,
+    "clean_after": [
+      "plan",
+      "create",
+      "verify",
+      "package",
+      "release",
+      "monitor",
+      "govern"
+    ]
+  },
+  "findings_before": [
+    {
+      "rule": "VERIFY_NO_TESTS",
+      "stage": "verify",
+      "severity": "blocker",
+      "message": "No test files found. Nothing stands between a typo and production.",
+      "path": null,
+      "line": null,
+      "excerpt": null,
+      "fix": "write_smoke_test",
+      "score": 40
+    },
+    {
+      "rule": "VERIFY_NO_COVERAGE_GATE",
+      "stage": "verify",
+      "severity": "high",
+      "message": "No coverage threshold configured, so a green pipeline proves nothing.",
+      "path": null,
+      "line": null,
+      "excerpt": null,
+      "fix": "write_coverage_gate",
+      "score": 20
+    },
+    {
+      "rule": "SECURE_HARDCODED_SECRET",
+      "stage": "secure",
+      "severity": "blocker",
+      "message": "Hardcoded credential (aws-access-key-id) committed to the repository.",
+      "path": "eval.py",
+      "line": 194,
+      "excerpt": "ok(\"AKIAIOSFODNN7EXAMPLE\" not in body, \"secret literal is removed from source\")",
+      "fix": "redact_secret",
+      "score": 40
+    },
+    {
+      "rule": "SECURE_DANGEROUS_CALL",
+      "stage": "secure",
+      "severity": "high",
+      "message": "Dangerous call 'eval' - a code-execution or TLS-downgrade footgun.",
+      "path": "shippilot/remedy.py",
+      "line": 297,
+      "excerpt": "Rewriting `eval()` or `shell=True` automatically is how pipelines break",
+      "fix": "guard_dangerous_call",
+      "score": 20
+    },
+    {
+      "rule": "SECURE_DANGEROUS_CALL",
+      "stage": "secure",
+      "severity": "high",
+      "message": "Dangerous call 'subprocess-shell-true' - a code-execution or TLS-downgrade footgun.",
+      "path": "shippilot/remedy.py",
+      "line": 297,
+      "excerpt": "Rewriting `eval()` or `shell=True` automatically is how pipelines break",
+      "fix": "guard_dangerous_call",
+      "score": 20
+    },
+    {
+      "rule": "CONFIGURE_NO_IAC",
+      "stage": "configure",
+      "severity": "low",
+      "message": "No infrastructure-as-code directory; environments drift silently.",
+      "path": null,
+      "line": null,
+      "excerpt": null,
+      "fix": null,
+      "score": 2
+    }
+  ],
+  "findings_after": [
+    {
+      "rule": "SECURE_HARDCODED_SECRET",
+      "stage": "secure",
+      "severity": "blocker",
+      "message": "Hardcoded credential (aws-access-key-id) committed to the repository.",
+      "path": "eval.py",
+      "line": 194,
+      "excerpt": "ok(\"AKIAIOSFODNN7EXAMPLE\" not in body, \"secret literal is removed from source\")",
+      "fix": "redact_secret",
+      "score": 40
+    },
+    {
+      "rule": "CONFIGURE_NO_IAC",
+      "stage": "configure",
+      "severity": "low",
+      "message": "No infrastructure-as-code directory; environments drift silently.",
+      "path": null,
+      "line": null,
+      "excerpt": null,
+      "fix": null,
+      "score": 2
+    }
+  ],
+  "risk_score_before": 100,
+  "risk_score_after": 42,
+  "actions": [
+    {
+      "rule": "SECURE_HARDCODED_SECRET",
+      "stage": "secure",
+      "severity": "blocker",
+      "path": "eval.py",
+      "line": 194,
+      "fix": "redact_secret",
+      "prompt": "secure/SECURE_HARDCODED_SECRET: eval.py",
+      "approved": true,
+      "changes": [],
+      "verified": false,
+      "residual": [
+        {
+          "rule": "SECURE_HARDCODED_SECRET",
+          "stage": "secure",
+          "severity": "blocker",
+          "message": "Hardcoded credential (aws-access-key-id) committed to the repository.",
+          "path": "eval.py",
+          "line": 194,
+          "excerpt": "ok(\"AKIAIOSFODNN7EXAMPLE\" not in body, \"secret literal is removed from source\")",
+          "fix": "redact_secret",
+          "score": 40
+        }
+      ]
+    },
+    {
+      "rule": "VERIFY_NO_TESTS",
+      "stage": "verify",
+      "severity": "blocker",
+      "path": null,
+      "line": null,
+      "fix": "write_smoke_test",
+      "prompt": "verify/VERIFY_NO_TESTS: repository",
+      "approved": true,
+      "changes": [
+        {
+          "path": "tests/test_smoke.py",
+          "action": "created",
+          "bytes": 852
+        }
+      ],
+      "verified": true,
+      "residual": []
+    },
+    {
+      "rule": "SECURE_DANGEROUS_CALL",
+      "stage": "secure",
+      "severity": "high",
+      "path": "shippilot/remedy.py",
+      "line": 297,
+      "fix": "guard_dangerous_call",
+      "prompt": "secure/SECURE_DANGEROUS_CALL: shippilot/remedy.py",
+      "approved": true,
+      "changes": [
+        {
+          "path": ".shippilot/waivers.json",
+          "action": "updated",
+          "bytes": 308
+        }
+      ],
+      "verified": false,
+      "residual": [
+        {
+          "rule": "SECURE_DANGEROUS_CALL",
+          "stage": "secure",
+          "severity": "high",
+          "message": "Dangerous call 'os.system' - a code-execution or TLS-downgrade footgun.",
+          "path": "examples/demo_repo/src/app.py",
+          "line": 11,
+          "excerpt": "os.system(\"echo \" + sql)",
+          "fix": "guard_dangerous_call",
+          "score": 20
+        }
+      ]
+    },
+    {
+      "rule": "VERIFY_NO_COVERAGE_GATE",
+      "stage": "verify",
+      "severity": "high",
+      "path": null,
+      "line": null,
+      "fix": "write_coverage_gate",
+      "prompt": "verify/VERIFY_NO_COVERAGE_GATE: repository",
+      "approved": true,
+      "changes": [
+        {
+          "path": "pytest.ini",
+          "action": "created",
+          "bytes": 91
+        }
+      ],
+      "verified": true,
+      "residual": []
+    }
+  ],
+  "applied": 3,
+  "verified": 2,
+  "unresolved": [
+    "SECURE_HARDCODED_SECRET",
+    "SECURE_DANGEROUS_CALL"
+  ],
+  "decision": "NO_GO",
+  "decision_reason": "blockers remain: SECURE_HARDCODED_SECRET",
+  "outcome_approved": false,
+  "carbon": {
+    "coefficients": {
+      "grid_intensity_gco2e_per_kwh": 383.0,
+      "runner_watts": 30.0,
+      "pue": 1.2,
+      "embodied_gco2e_per_hour": 6.0
+    },
+    "measured": {
+      "seconds": 0.1511,
+      "kwh": 1.511e-06,
+      "operational_gco2e": 0.000579,
+      "embodied_gco2e": 0.000252,
+      "total_gco2e": 0.00083,
+      "per_1000_builds_gco2e": 0.83
+    },
+    "with_stage_cache": {
+      "seconds": 0.0849,
+      "kwh": 8.49e-07,
+      "operational_gco2e": 0.000325,
+      "embodied_gco2e": 0.000142,
+      "total_gco2e": 0.000467,
+      "per_1000_builds_gco2e": 0.467,
+      "saved_gco2e": 0.000364,
+      "saved_percent": 43.78
+    },
+    "with_cache_and_parallelism": {
+      "seconds": 0.0676,
+      "kwh": 6.76e-07,
+      "operational_gco2e": 0.000259,
+      "embodied_gco2e": 0.000113,
+      "total_gco2e": 0.000372,
+      "per_1000_builds_gco2e": 0.372,
+      "saved_gco2e": 0.000459,
+      "saved_percent": 55.24
+    },
+    "per_stage": {
+      "configure": {
+        "seconds": 0.0173,
+        "kwh": 1.73e-07,
+        "operational_gco2e": 6.6e-05,
+        "embodied_gco2e": 2.9e-05,
+        "total_gco2e": 9.5e-05,
+        "per_1000_builds_gco2e": 0.095
+      },
+      "create": {
+        "seconds": 0.022,
+        "kwh": 2.2e-07,
+        "operational_gco2e": 8.4e-05,
+        "embodied_gco2e": 3.7e-05,
+        "total_gco2e": 0.000121,
+        "per_1000_builds_gco2e": 0.121
+      },
+      "govern": {
+        "seconds": 0.0017,
+        "kwh": 1.7e-08,
+        "operational_gco2e": 6e-06,
+        "embodied_gco2e": 3e-06,
+        "total_gco2e": 9e-06,
+        "per_1000_builds_gco2e": 0.009
+      },
+      "monitor": {
+        "seconds": 0.0289,
+        "kwh": 2.89e-07,
+        "operational_gco2e": 0.000111,
+        "embodied_gco2e": 4.8e-05,
+        "total_gco2e": 0.000159,
+        "per_1000_builds_gco2e": 0.159
+      },
+      "package": {
+        "seconds": 0.0016,
+        "kwh": 1.6e-08,
+        "operational_gco2e": 6e-06,
+        "embodied_gco2e": 3e-06,
+        "total_gco2e": 9e-06,
+        "per_1000_builds_gco2e": 0.009
+      },
+      "plan": {
+        "seconds": 0.0024,
+        "kwh": 2.4e-08,
+        "operational_gco2e": 9e-06,
+        "embodied_gco2e": 4e-06,
+        "total_gco2e": 1.3e-05,
+        "per_1000_builds_gco2e": 0.013
+      },
+      "release": {
+        "seconds": 0.0015,
+        "kwh": 1.5e-08,
+        "operational_gco2e": 6e-06,
+        "embodied_gco2e": 2e-06,
+        "total_gco2e": 8e-06,
+        "per_1000_builds_gco2e": 0.008
+      },
+      "secure": {
+        "seconds": 0.0676,
+        "kwh": 6.76e-07,
+        "operational_gco2e": 0.000259,
+        "embodied_gco2e": 0.000113,
+        "total_gco2e": 0.000372,
+        "per_1000_builds_gco2e": 0.372
+      },
+      "verify": {
+        "seconds": 0.0081,
+        "kwh": 8.1e-08,
+        "operational_gco2e": 3.1e-05,
+        "embodied_gco2e": 1.4e-05,
+        "total_gco2e": 4.5e-05,
+        "per_1000_builds_gco2e": 0.045
+      }
+    },
+    "method": "SCI = (E * I) + M; E measured as wall-clock x runner watts x PUE"
+  }
+}
