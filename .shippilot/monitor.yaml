@@ -1,0 +1,17 @@
+# ShipPilot's own service level objectives.
+service: shippilot
+slos:
+  - name: audit-completeness
+    target: 1.0
+    window: 7d
+    query: every run reports all nine stages
+  - name: verification-honesty
+    target: 1.0
+    window: 7d
+    query: verified <= applied on every receipt
+alerts:
+  - name: unresolved-growth
+    expr: increase(shippilot_unresolved_total[7d]) > 0
+    for: 1h
+    severity: ticket
+healthcheck: /healthz
