@@ -1,0 +1,7 @@
+{
+  "generated_by": "shippilot",
+  "pinned": [],
+  "unpinned": [],
+  "advisories": [],
+  "note": "No runtime dependencies to audit. The optional console dependency (gradio) is installed separately and is not required by the CLI, MCP server or CI."
+}
