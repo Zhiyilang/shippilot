@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: shippilot
+    runtime: python
+    plan: free
+    buildCommand: "pip install gradio>=6"
+    startCommand: "python app.py"
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: "1"
