@@ -1,0 +1,76 @@
+# Autonomy level: SUPERVISED
+#
+# The pipeline clears its own gates: it audits, fixes, and re-verifies across all
+# nine stages, then stops once so a human approves the outcome. This is the
+# default, and what most teams should run on every merge request.
+
+version: "1"
+environment: ambient
+
+components:
+  - name: perceive
+    type: AgentComponent
+    prompt_id: perceive_prompt
+    inputs:
+      - from: "context:goal"
+        as: "goal"
+    tool_overrides:
+      - tool: "mcp.shippilot.audit_repo"
+        params:
+          root: "."
+          limit: 40
+
+  - name: ship
+    type: AgentComponent
+    prompt_id: ship_prompt
+    inputs:
+      - from: "components.perceive.output"
+        as: "baseline"
+    tool_overrides:
+      - tool: "mcp.shippilot.ship_repo"
+        params:
+          root: "."
+          autonomy: "supervised"
+          approve: true
+
+  - name: report
+    type: AgentComponent
+    prompt_id: report_prompt
+    inputs:
+      - from: "components.ship.output"
+        as: "receipt"
+    tool_overrides:
+      - tool: "mcp.shippilot.render_receipt"
+        params:
+          root: "."
+          autonomy: "supervised"
+
+prompts:
+  - id: perceive_prompt
+    template: |
+      You are the perceiving step of the post-code lifecycle. Goal: {{ goal }}
+      Call mcp.shippilot.audit_repo and summarise the baseline risk score.
+
+  - id: ship_prompt
+    template: |
+      Baseline: {{ baseline }}
+      Call mcp.shippilot.ship_repo with autonomy "supervised". Let the pipeline
+      clear its own gates across all nine stages. Report the decision, what was
+      applied, and what the verifier could not confirm.
+
+  - id: report_prompt
+    template: |
+      Receipt: {{ receipt }}
+      Call mcp.shippilot.render_receipt, then write a short summary for the merge
+      request: decision, stages covered, risk score before and after, carbon.
+
+routers:
+  - from: perceive
+    to: ship
+  - from: ship
+    to: report
+
+flow:
+  - perceive
+  - ship
+  - report
