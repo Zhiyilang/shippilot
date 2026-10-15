@@ -1,0 +1,3 @@
+# ShipPilot audits itself. This one path is the deliberately-broken fixture the
+# demo and the test suite run against, so it is exempt from the self-audit.
+examples/demo_repo
