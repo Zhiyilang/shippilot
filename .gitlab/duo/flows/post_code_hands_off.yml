@@ -1,0 +1,78 @@
+# Autonomy level: HANDS-OFF
+#
+# A human states the intent and walks away. The flow audits, fixes, re-verifies,
+# stages, secures, releases, configures, monitors and governs - and then reports.
+# One thing is not negotiable: a remaining blocker is a NO_GO at every level.
+
+version: "1"
+environment: ambient
+
+components:
+  - name: perceive
+    type: AgentComponent
+    prompt_id: perceive_prompt
+    inputs:
+      - from: "context:goal"
+        as: "goal"
+    tool_overrides:
+      - tool: "mcp.shippilot.audit_repo"
+        params:
+          root: "."
+          limit: 40
+
+  - name: ship
+    type: AgentComponent
+    prompt_id: ship_prompt
+    inputs:
+      - from: "components.perceive.output"
+        as: "baseline"
+    tool_overrides:
+      - tool: "mcp.shippilot.ship_repo"
+        params:
+          root: "."
+          autonomy: "hands-off"
+          approve: true
+          write_receipt: true
+
+  - name: report
+    type: AgentComponent
+    prompt_id: report_prompt
+    inputs:
+      - from: "components.ship.output"
+        as: "receipt"
+    tool_overrides:
+      - tool: "mcp.shippilot.render_receipt"
+        params:
+          root: "."
+          autonomy: "hands-off"
+
+prompts:
+  - id: perceive_prompt
+    template: |
+      Goal: {{ goal }}
+      Audit the repository once with mcp.shippilot.audit_repo. Report the baseline
+      risk score and the blockers.
+
+  - id: ship_prompt
+    template: |
+      Baseline: {{ baseline }}
+      Run mcp.shippilot.ship_repo with autonomy "hands-off". Do not ask for
+      approval - the gate is the verifier. If the decision is NO_GO, say so and
+      name the blockers that remain.
+
+  - id: report_prompt
+    template: |
+      Receipt: {{ receipt }}
+      Call mcp.shippilot.render_receipt and post a summary: decision, coverage,
+      risk score delta, carbon, and anything a human still has to decide.
+
+routers:
+  - from: perceive
+    to: ship
+  - from: ship
+    to: report
+
+flow:
+  - perceive
+  - ship
+  - report
