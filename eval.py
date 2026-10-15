@@ -14,6 +14,29 @@ import sys
 import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+
+def runpy(args, **kw):
+    """Run a child interpreter over a deterministic UTF-8 pipe.
+
+    Without this, the suite crashes on a cp936 Windows locale: the child
+    emits UTF-8 bytes while the parent's reader thread decodes with the
+    locale codec, the reader dies with UnicodeDecodeError, and stdout
+    silently becomes None -- surfacing later as a confusing TypeError.
+    """
+    import os
+    env = dict(os.environ)
+    env["PYTHONUTF8"] = "1"
+    env["PYTHONIOENCODING"] = "utf-8"
+    kw.setdefault("capture_output", True)
+    kw.setdefault("text", True)
+    kw.setdefault("encoding", "utf-8")
+    kw.setdefault("errors", "replace")
+    kw.setdefault("timeout", 180)
+    kw.setdefault("cwd", HERE)
+    kw.setdefault("env", env)
+    return subprocess.run([sys.executable] + list(args), **kw)
+
+
 sys.path.insert(0, HERE)
 
 from shippilot import autonomy as autonomy_mod, carbon as carbon_mod, orchestrator, receipt as receipt_mod, remedy, stages  # noqa: E402
@@ -386,7 +409,7 @@ msgs = [
     json.dumps({"jsonrpc": "2.0", "id": 10, "method": "tools/call",
                 "params": {"name": "nope", "arguments": {}}}),
 ]
-proc = subprocess.run([sys.executable, "-m", "shippilot.mcp_server"],
+proc = runpy(["-m", "shippilot.mcp_server"],
                       input="\n".join(msgs) + "\n", capture_output=True, text=True,
                       cwd=HERE, timeout=180)
 outs = []
@@ -436,13 +459,13 @@ ok("error" in json.loads(by_id[10]["result"]["content"][0]["text"]), "unknown to
 # ---------------------------------------------------------------- J. CLI
 section("J. CLI")
 r_cli = fresh()
-p1 = subprocess.run([sys.executable, "-m", "shippilot", "audit", "--root", r_cli],
+p1 = runpy(["-m", "shippilot", "audit", "--root", r_cli],
                     capture_output=True, text=True, cwd=HERE, timeout=120)
 ok("SECURE_HARDCODED_SECRET" in p1.stdout, "cli audit prints the blocker")
 ok("risk score" in p1.stdout, "cli audit prints risk score")
 ok(p1.returncode == 2, "cli audit exits 2 when blockers exist")
 
-p2 = subprocess.run([sys.executable, "-m", "shippilot", "audit", "--root", r_cli,
+p2 = runpy(["-m", "shippilot", "audit", "--root", r_cli,
                      "--stage", "secure", "--json"],
                     capture_output=True, text=True, cwd=HERE, timeout=120)
 ok(p2.returncode == 2, "single stage audit exits 2 on the blocker")
@@ -450,30 +473,30 @@ ok(len(json.loads(p2.stdout)["stages"]) == 1, "single stage audit runs one stage
 ok(all(x["stage"] == "secure" for x in json.loads(p2.stdout)["findings"]),
    "single stage audit returns only that stage")
 
-p3 = subprocess.run([sys.executable, "-m", "shippilot", "audit", "--root", fresh_clean()],
+p3 = runpy(["-m", "shippilot", "audit", "--root", fresh_clean()],
                     capture_output=True, text=True, cwd=HERE, timeout=120)
 ok(p3.returncode == 0, "clean repo audit exits 0")
 
-p4 = subprocess.run([sys.executable, "-m", "shippilot", "ship", "--root", r_cli,
+p4 = runpy(["-m", "shippilot", "ship", "--root", r_cli,
                      "--autonomy", "hands-off"],
                     capture_output=True, text=True, cwd=HERE, timeout=180)
 ok("decision" in p4.stdout, "cli ship prints a decision")
 ok("coverage" in p4.stdout, "cli ship prints coverage")
 ok(p4.returncode in (0, 1, 2), "cli ship exits with a known code")
 
-p5 = subprocess.run([sys.executable, "-m", "shippilot", "ship", "--root", fresh(),
+p5 = runpy(["-m", "shippilot", "ship", "--root", fresh(),
                      "--autonomy", "assisted", "--deny-all"],
                     capture_output=True, text=True, cwd=HERE, timeout=180)
 ok("NO_GO" in p5.stdout, "denied assisted run reports NO_GO")
 ok(p5.returncode == 2, "NO_GO exits 2")
 
-p6 = subprocess.run([sys.executable, "-m", "shippilot", "stages"],
+p6 = runpy(["-m", "shippilot", "stages"],
                     capture_output=True, text=True, cwd=HERE, timeout=60)
 for s in STAGES:
     ok(s in p6.stdout, "cli stages lists %s" % s)
 ok("hands-off" in p6.stdout, "cli stages lists autonomy levels")
 
-p7 = subprocess.run([sys.executable, "-m", "shippilot", "audit", "--root", "/definitely/not/here"],
+p7 = runpy(["-m", "shippilot", "audit", "--root", "/definitely/not/here"],
                     capture_output=True, text=True, cwd=HERE, timeout=60)
 ok(p7.returncode in (0, 2), "missing repo does not crash the cli")
 ok("risk score" in p7.stdout, "missing repo still prints a score")
