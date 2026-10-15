@@ -1,0 +1,16 @@
+# GitLab Duo Agent Platform agent configuration.
+#
+# ShipPilot has no third-party dependencies, so the flow container needs nothing
+# but Python. That is the point: the whole lifecycle runs offline, in a sandbox,
+# with no network and no key.
+
+image: python:3.12-slim
+
+setup_script:
+  - python -c "import sys; print('python', sys.version.split()[0])"
+  - python -m shippilot audit --root . || true
+
+cache:
+  key: shippilot
+  paths:
+    - __pycache__/
