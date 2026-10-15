@@ -1,0 +1,77 @@
+# Autonomy level: ASSISTED
+#
+# The agent proposes one fix at a time and waits. Nothing is written until a
+# human says yes to that specific action. Use this when the repository is
+# unfamiliar or the change touches release-critical files.
+
+version: "1"
+environment: ambient
+
+components:
+  - name: perceive
+    type: AgentComponent
+    prompt_id: perceive_prompt
+    inputs:
+      - from: "context:goal"
+        as: "goal"
+    tool_overrides:
+      - tool: "mcp.shippilot.audit_repo"
+        params:
+          root: "."
+          limit: 40
+
+  - name: propose
+    type: AgentComponent
+    prompt_id: propose_prompt
+    inputs:
+      - from: "components.perceive.output"
+        as: "findings"
+    tool_overrides:
+      - tool: "mcp.shippilot.plan_lifecycle"
+        params:
+          root: "."
+          autonomy: "assisted"
+
+  - name: apply_next
+    type: AgentComponent
+    prompt_id: apply_prompt
+    inputs:
+      - from: "components.propose.output"
+        as: "plan"
+    tool_overrides:
+      - tool: "mcp.shippilot.apply_fix"
+        params:
+          root: "."
+
+prompts:
+  - id: perceive_prompt
+    template: |
+      You are auditing the repository for the post-code DevSecOps lifecycle.
+      Goal: {{ goal }}
+      Call mcp.shippilot.audit_repo and report the findings ordered by severity.
+      Do not fix anything yet.
+
+  - id: propose_prompt
+    template: |
+      Given these findings:
+      {{ findings }}
+      Call mcp.shippilot.plan_lifecycle with autonomy "assisted". Present the
+      single highest-severity action you recommend and wait for approval.
+
+  - id: apply_prompt
+    template: |
+      Given this plan:
+      {{ plan }}
+      Apply exactly one fix with mcp.shippilot.apply_fix, report whether the
+      verifier confirmed it, then stop and wait for the next instruction.
+
+routers:
+  - from: perceive
+    to: propose
+  - from: propose
+    to: apply_next
+
+flow:
+  - perceive
+  - propose
+  - apply_next
