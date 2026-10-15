@@ -1,0 +1,91 @@
+# ShipPilot's own pipeline.
+#
+# Every stage below is real: the job runs the inspector for that stage against
+# the bundled example repository and prints what it found. The example is
+# deliberately dirty, so the audit jobs report findings instead of failing the
+# pipeline - `shippilot-ship` is the job that actually gates on them.
+
+stages:
+  - plan
+  - create
+  - verify
+  - package
+  - secure
+  - release
+  - configure
+  - monitor
+  - govern
+
+default:
+  image: python:3.12-slim
+
+variables:
+  PYTHONUNBUFFERED: "1"
+  DEMO: "examples/demo_repo"
+
+shippilot-plan:
+  stage: plan
+  script: ["python -m shippilot audit --stage plan --root $DEMO || true"]
+
+shippilot-create:
+  stage: create
+  script: ["python -m shippilot audit --stage create --root $DEMO || true"]
+
+shippilot-verify:
+  stage: verify
+  script: ["python -m shippilot audit --stage verify --root $DEMO || true"]
+
+shippilot-package:
+  stage: package
+  script: ["python -m shippilot audit --stage package --root $DEMO || true"]
+
+shippilot-secure:
+  stage: secure
+  script: ["python -m shippilot audit --stage secure --root $DEMO || true"]
+
+shippilot-release:
+  stage: release
+  script: ["python -m shippilot audit --stage release --root $DEMO || true"]
+
+shippilot-configure:
+  stage: configure
+  script: ["python -m shippilot audit --stage configure --root $DEMO || true"]
+
+shippilot-monitor:
+  stage: monitor
+  script: ["python -m shippilot audit --stage monitor --root $DEMO || true"]
+
+shippilot-govern:
+  stage: govern
+  script: ["python -m shippilot audit --stage govern --root $DEMO || true"]
+
+# The gate. Assisted stops at every action, supervised stops once at the end,
+# hands-off never stops - and still refuses to ship on a blocker.
+shippilot-ship-assisted:
+  stage: govern
+  script: ["python -m shippilot ship --root $DEMO --autonomy assisted"]
+  allow_failure: true
+  artifacts:
+    paths: [".shippilot/"]
+    expire_in: 30 days
+
+shippilot-ship-hands-off:
+  stage: govern
+  script: ["python -m shippilot ship --root $DEMO --autonomy hands-off"]
+  artifacts:
+    paths: [".shippilot/"]
+    expire_in: 30 days
+
+# Dogfooding: ShipPilot audits its own repository on every push.
+shippilot-self-audit:
+  stage: govern
+  script: ["python -m shippilot audit --root . || true"]
+  allow_failure: true
+
+tests:
+  stage: verify
+  script: ["python eval.py"]
+  artifacts:
+    when: always
+    paths: [".shippilot/"]
+    expire_in: 7 days
