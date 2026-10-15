@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "shippilot": {
+      "command": "python",
+      "args": ["-m", "shippilot.mcp_server"],
+      "env": {
+        "SHIPPILOT_CARBON_INTENSITY": "383",
+        "SHIPPILOT_RUNNER_WATTS": "30",
+        "SHIPPILOT_PUE": "1.2"
+      }
+    }
+  }
+}
