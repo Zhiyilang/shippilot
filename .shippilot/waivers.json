@@ -1,0 +1,11 @@
+{
+  "waivers": [
+    {
+      "rule": "SECURE_DANGEROUS_CALL",
+      "path": "shippilot/remedy.py",
+      "line": 297,
+      "excerpt": "Rewriting `eval()` or `shell=True` automatically is how pipelines break",
+      "reason": "Reviewed and accepted by the pipeline owner; tracked for follow-up."
+    }
+  ]
+}
