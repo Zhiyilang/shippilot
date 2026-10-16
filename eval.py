@@ -505,6 +505,7 @@ ok("PLAN_NO_SPEC" in p7.stdout, "missing repo reports the absence of a plan")
 # ---------------------------------------------------------------- summary
 print("\n" + "=" * 60)
 print("PASS %d   FAIL %d" % (len(PASS), len(FAIL)))
+print("RESULT: %d passed, %d failed" % (len(PASS), len(FAIL)))
 if FAIL:
     for f in FAIL:
         print("  - %s" % f)
