@@ -50,7 +50,33 @@ the page will offer to register your own runner. The trial avoids this.
 
 ## 5. Then
 
-- Record the demo video — see `DEMO_SCRIPT.md` (2:45, scripted shot by shot).
+- **Upload the demo video** — it is already recorded (`shippilot_demo.mp4`,
+  32.7s, under the 3-minute rule, now committed to the repo). Copy-paste block:
+
+  - **Title:** `ShipPilot — nine DevSecOps stages, one autonomy dial (GitLab Transcend Hackathon)`
+  - **Description:**
+
+    ```text
+    ShipPilot automates the nine stages that happen after the code is written:
+    plan, create, verify, package, secure, release, configure, monitor, govern.
+
+    One parameter — --autonomy — moves between assisted (human approves every
+    write), supervised (human approves the outcome once) and hands-off (human
+    states intent and walks away). The checks are identical at all three levels;
+    only who is in the loop changes, which is what makes autonomy auditable.
+
+    The agent proposes; the same deterministic inspector that raised a finding
+    decides what counts as fixed; the gate decides what ships by arithmetic on
+    residual findings, not model confidence. A run reporting "20 applied,
+    19 verified" is a run that worked — the twentieth is what a human must see.
+
+    Python standard library only. MCP over stdio. GitLab Duo Agent Platform
+    flows. Zero dependencies, zero API keys.
+    ```
+
+  - **Tags:** `GitLab, DevSecOps, AI agents, MCP, automation, hackathon`
+  - **Visibility:** Public (the checklist requires a public video)
+
 - Submit on Devpost — every field is pre-written in `SUBMISSION.md`.
 - Tick: Path A, autonomy = hands-off, and the **Most Environmentally Impactful**
   opt-in.
@@ -64,5 +90,5 @@ the page will offer to register your own runner. The trial avoids this.
 | Code, tests, docs, MCP, flows, CI config | done | 245/245 assertions green |
 | GitHub repo `Zhiyilang/shippilot` | done | public |
 | GitLab account + import + run pipeline | **you** | ~20 min |
-| Demo video | **you** | ~30 min, script ready |
+| Demo video | done | 32.7s, committed; upload to YouTube Public (~10 min) |
 | Devpost submit (I can drive the browser once you're logged in) | together | 10 min |
